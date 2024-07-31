@@ -1,0 +1,3 @@
+[run]
+source = oregoninvasiveshotline
+omit = */migrations/*,oregoninvasiveshotline/wsgi.py

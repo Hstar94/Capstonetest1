@@ -1,0 +1,26 @@
+[
+{
+    "pk": 1,
+    "fields": {
+        "name": "native",
+        "color": "#999999"
+    },
+    "model": "species.severity"
+},
+{
+    "pk": 2,
+    "fields": {
+        "name": "non-native",
+        "color": "#E99A2B"
+    },
+    "model": "species.severity"
+},
+{
+    "pk": 3,
+    "fields": {
+        "name": "invasive",
+        "color": "#7C2416"
+    },
+    "model": "species.severity"
+}
+]

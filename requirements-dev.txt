@@ -1,0 +1,4 @@
+-f https://packages.wdt.pdx.edu/dist
+
+-e .[dev]
+

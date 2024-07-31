@@ -1,0 +1,16 @@
+# Root
+/.env
+/builds
+/dist
+/node_modules
+/media
+/static
+/volumes
+/*.egg-info/
+/.coverage
+/trash
+
+# Anywhere
+__pycache__/
+*.pyc
+*.pyo

@@ -1,0 +1,113 @@
+
+
+secrets:
+  SecretKey:
+    file: docker/secret_key.txt
+  DBPassword:
+    file: docker/db_password.txt
+  GOOGLE_API_KEY:
+    file: docker/google_api_key.txt
+
+networks:
+  default:
+    driver: bridge
+
+services:
+  postgres:
+    image: postgis/postgis:11-2.5
+    networks:
+      - default
+    environment:
+      - POSTGRES_USER=invasives
+      - POSTGRES_PASSWORD=invasives
+      - POSTGRES_DB=invasives
+    volumes:
+      - ${VOLUME_PATH}/postgres/11/main:/var/lib/postgresql/data
+      - ${VOLUME_PATH}/dumps:/archive
+
+  rabbitmq:
+    image: rabbitmq:3-alpine
+    networks:
+      - default
+    volumes:
+      - ${VOLUME_PATH}/rabbitmq:/var/lib/rabbitmq
+    # override hostname to prevent reinitialization of data
+    # on container delete/init cycle.
+    #   Refs: https://github.com/docker-library/rabbitmq/issues/106#issuecomment-241882358
+    hostname: 'rabbitmq-dev'
+    user: '${USER_ID}'
+
+  bootstrap:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        - APP_USER_ID=${USER_ID}
+        - APP_GROUP_ID=${GROUP_ID}
+    environment:
+      - EMCEE_CMD_ENV=docker
+      - APP_SERVICE=bootstrap
+    networks:
+      - default
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${VOLUME_PATH}/media:/media
+      - ${VOLUME_PATH}/static:/static
+      - ./:/app
+    depends_on:
+      - postgres
+    secrets:
+      - SecretKey
+      - DBPassword
+    user: '${USER_ID}'
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        - APP_USER_ID=${USER_ID}
+        - APP_GROUP_ID=${GROUP_ID}
+    environment:
+      - EMCEE_CMD_ENV=docker
+      - APP_SERVICE=wsgi
+    networks:
+      - default
+    ports:
+      - 8000:8000
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${VOLUME_PATH}/media:/media
+      - ${VOLUME_PATH}/static:/static
+      - ./:/app
+    depends_on:
+      - postgres
+      - rabbitmq
+    secrets:
+      - SecretKey
+      - DBPassword
+      - GOOGLE_API_KEY
+    user: '${USER_ID}'
+
+  celery:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        - APP_USER_ID=${USER_ID}
+        - APP_GROUP_ID=${GROUP_ID}
+    environment:
+      - EMCEE_CMD_ENV=docker
+      - APP_SERVICE=celery
+    networks:
+      - default
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${VOLUME_PATH}/media:/media
+      - ./:/app
+    depends_on:
+      - app
+    secrets:
+      - SecretKey
+      - DBPassword
+    user: '${USER_ID}'
