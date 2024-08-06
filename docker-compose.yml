@@ -30,7 +30,7 @@ services:
     networks:
       - default
     volumes:
-      - ${VOLUME_PATH}/rabbitmq:/var/lib/rabbitmq
+      - ${VOLUME_PATH}/rabbitmq:/var/lib/rabbitmq/mnesia      # Adjusted Path for Windows compatibility KEEP IN MIND.
     # override hostname to prevent reinitialization of data
     # on container delete/init cycle.
     #   Refs: https://github.com/docker-library/rabbitmq/issues/106#issuecomment-241882358
