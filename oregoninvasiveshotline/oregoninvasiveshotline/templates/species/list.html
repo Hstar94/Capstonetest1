@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% include '_admin_panel_nav.html' with nav_home=True nav_active='species' %}<hr>
+
+    <h3 class="clearfix">
+        Species
+        <a href="{% url 'species-create' %}" class="pull-right btn btn-primary">Create a new species</a>
+    </h3>
+
+    <form class="form-inline" style="margin: 15px 0;">
+        {{ form.non_field_errors }}
+        {{ form.q|bootstrap }}
+        {{ form.order_by|bootstrap }}
+        {{ form.order|bootstrap }}
+        <div class="pull-right">
+            <input type="submit" name="submit" value="Search" class="btn btn-primary" />
+            <a class="btn btn-warning" href="{% url 'species-list' %}">Reset</a>
+        </div>
+    </form>
+
+    {% if all_species %}
+        <table class="table table-condensed table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Scientific name</th>
+                    <th>Category</th>
+                    <th>Severity</th>
+                    <th class="text-center">Confidential?</th>
+                    <th class="text-right">&nbsp;</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for species in all_species %}
+                    <tr>
+                        <td><a href="{% url 'species-detail' species.pk %}">{{ species.name }}</a></td>
+                        <td>{{ species.scientific_name }}</td>
+                        <td>{{ species.category }}</td>
+                        <td>{{ species.severity }}</td>
+                        <td class="text-center">
+                            {% if species.is_confidential %}
+                                <span class="glyphicon glyphicon-ok"></span>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td class="text-right">
+                            <a href="{% url 'species-detail' species.pk %}"
+                               title="Edit this species"><span class="glyphicon glyphicon-edit"></span></a>
+                            &nbsp;
+                            <a href="{% url 'species-delete' species.pk %}"
+                               class="text-danger"><span class="glyphicon glyphicon-trash"></span></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% include '_pagination.html' with items=all_species %}
+    {% else %}
+        <div class="alert alert-warning">No species matching those search criteria were found.</div>
+    {% endif %}
+{% endblock %}
